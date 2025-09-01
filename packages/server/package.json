@@ -16,6 +16,8 @@
    },
    "dependencies": {
       "express": "^5.1.0",
-      "notenv": "^2.0.3"
+      "notenv": "^2.0.3",
+      "openai": "^5.16.0",
+      "zod": "^4.1.5"
    }
 }
