@@ -18,14 +18,18 @@ type ChatResponse = {
    message: string;
 };
 
-const ChatBot = () => {
-   const conversationId = React.useRef(crypto.randomUUID());
-   const [messages, setMessages] = React.useState<string[]>([]);
+type Message = {
+   content: string;
+   role: 'user' | 'bot';
+};
 
+const ChatBot = () => {
+   const [messages, setMessages] = React.useState<Message[]>([]);
+   const conversationId = React.useRef(crypto.randomUUID());
    const { register, handleSubmit, reset, formState } = useForm<FormData>();
 
    const onSubmit = async ({ prompt }: FormData) => {
-      setMessages((prev) => [...prev, prompt]);
+      setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
 
       reset();
 
@@ -33,7 +37,7 @@ const ChatBot = () => {
          prompt,
          conversationId: conversationId.current,
       });
-      setMessages((prev) => [...prev, data.message]);
+      setMessages((prev) => [...prev, { content: data.message, role: 'bot' }]);
    };
 
    const onKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
@@ -56,9 +60,18 @@ const ChatBot = () => {
 
    return (
       <div>
-         <div>
+         <div className="flex flex-col gap-3 mb-10">
             {messages.map((message, index) => (
-               <p key={index}>{message}</p>
+               <p
+                  key={index}
+                  className={`px-3 py-1 rounded-xl ${
+                     message.role === 'user'
+                        ? 'bg-blue-600 text-white self-end'
+                        : 'bg-gray-100 text-black self-start'
+                  }`}
+               >
+                  {message.content}
+               </p>
             ))}
          </div>
          <form
