@@ -2,6 +2,8 @@ import type { KeyboardEvent } from 'react';
 
 import * as React from 'react';
 
+import ReactMarkdown from 'react-markdown';
+
 import axios from 'axios';
 
 import { useForm } from 'react-hook-form';
@@ -62,7 +64,7 @@ const ChatBot = () => {
       <div>
          <div className="flex flex-col gap-3 mb-10">
             {messages.map((message, index) => (
-               <p
+               <span
                   key={index}
                   className={`px-3 py-1 rounded-xl ${
                      message.role === 'user'
@@ -70,8 +72,8 @@ const ChatBot = () => {
                         : 'bg-gray-100 text-black self-start'
                   }`}
                >
-                  {message.content}
-               </p>
+                  <ReactMarkdown>{message.content}</ReactMarkdown>
+               </span>
             ))}
          </div>
          <form
