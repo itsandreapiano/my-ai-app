@@ -29,8 +29,15 @@ const ChatBot = () => {
    const [messages, setMessages] = React.useState<Message[]>([]);
    const [isBotTyping, setIsBotTyping] = React.useState(false);
 
+   const formRef = React.useRef<HTMLFormElement | null>(null);
+
    const conversationId = React.useRef(crypto.randomUUID());
    const { register, handleSubmit, reset, formState } = useForm<FormData>();
+
+   // Scroll down to bottom of the conversation after submitting new prompts
+   React.useEffect(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+   }, [messages]);
 
    const onSubmit = async ({ prompt }: FormData) => {
       setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
@@ -53,10 +60,10 @@ const ChatBot = () => {
       }
    };
 
+   // Change height of textarea as text grows
    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
    const handleInput = () => {
-      // Change height of textarea as text grows
       const textarea = textareaRef.current;
       if (textarea) {
          textarea.style.height = 'auto';
@@ -90,6 +97,7 @@ const ChatBot = () => {
          <form
             onSubmit={handleSubmit(onSubmit)}
             onKeyDown={onKeyDown}
+            ref={formRef}
             className="flex flex-col gap-2 items-end border-2 p-4 rounded-3xl"
          >
             <textarea
