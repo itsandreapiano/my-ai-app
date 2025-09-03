@@ -29,21 +29,21 @@ const ChatBot = () => {
    const [messages, setMessages] = React.useState<Message[]>([]);
    const [isBotTyping, setIsBotTyping] = React.useState(false);
 
-   const formRef = React.useRef<HTMLFormElement | null>(null);
+   const lastMessageRef = React.useRef<HTMLDivElement | null>(null);
 
    const conversationId = React.useRef(crypto.randomUUID());
    const { register, handleSubmit, reset, formState } = useForm<FormData>();
 
    // Scroll down to bottom of the conversation after submitting new prompts
    React.useEffect(() => {
-      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+      lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
    }, [messages]);
 
    const onSubmit = async ({ prompt }: FormData) => {
       setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
       setIsBotTyping(true);
 
-      reset();
+      reset({ prompt: '' });
 
       const { data } = await axios.post<ChatResponse>('/api/chat', {
          prompt,
@@ -71,12 +71,23 @@ const ChatBot = () => {
       }
    };
 
+   // Resetting copy styiling
+   const onCopyMessage = (e: React.ClipboardEvent) => {
+      const selection = window.getSelection()?.toString().trim();
+      if (selection) {
+         e.preventDefault();
+         e.clipboardData.setData('text/plain', selection);
+      }
+   };
+
    return (
-      <div>
-         <div className="flex flex-col gap-3 mb-10">
+      <div className="flex flex-col h-full">
+         <div className="flex flex-col flex-1 gap-3 mb-10 overflow-y-auto">
             {messages.map((message, index) => (
-               <span
+               <div
                   key={index}
+                  onCopy={onCopyMessage}
+                  ref={index === messages.length - 1 ? lastMessageRef : null}
                   className={`px-3 py-1 rounded-xl ${
                      message.role === 'user'
                         ? 'bg-blue-600 text-white self-end'
@@ -84,7 +95,7 @@ const ChatBot = () => {
                   }`}
                >
                   <ReactMarkdown>{message.content}</ReactMarkdown>
-               </span>
+               </div>
             ))}
             {isBotTyping && (
                <div className="flex self-start gap-1 px-3 py-3 bg-gray-200 rounded-xl">
@@ -97,7 +108,6 @@ const ChatBot = () => {
          <form
             onSubmit={handleSubmit(onSubmit)}
             onKeyDown={onKeyDown}
-            ref={formRef}
             className="flex flex-col gap-2 items-end border-2 p-4 rounded-3xl"
          >
             <textarea
@@ -109,6 +119,7 @@ const ChatBot = () => {
                   textareaRef.current = textPrompt;
                   register('prompt').ref(textPrompt);
                }}
+               autoFocus
                className="w-full border-0 focus:outline-0 resize-none overflow-hidden"
                placeholder="Ask anything"
                maxLength={1000}
