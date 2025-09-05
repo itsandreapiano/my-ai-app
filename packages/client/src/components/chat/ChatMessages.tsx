@@ -35,13 +35,30 @@ const ChatMessages = ({ messages }: Props) => {
                key={index}
                onCopy={onCopyMessage}
                ref={index === messages.length - 1 ? lastMessageRef : null}
-               className={`px-3 py-1 rounded-xl ${
+               className={`px-3 py-1 rounded-xl  ${
                   message.role === 'user'
                      ? 'bg-blue-600 text-white self-end'
                      : 'bg-gray-100 text-black self-start'
                }`}
             >
-               <ReactMarkdown>{message.content}</ReactMarkdown>
+               <ReactMarkdown
+                  components={{
+                     p: ({ node, ...props }) => (
+                        <p className="my-2 first:mt-0 last:mb-0" {...props} />
+                     ),
+                     ol: ({ node, ...props }) => (
+                        <ol className="list-decimal ml-5 mb-4" {...props} />
+                     ),
+                     ul: ({ node, ...props }) => (
+                        <ul className="list-disc ml-5 mb-4" {...props} />
+                     ),
+                     li: ({ node, ...props }) => (
+                        <li className="mb-1 last:mb-0" {...props} />
+                     ),
+                  }}
+               >
+                  {message.content}
+               </ReactMarkdown>
             </div>
          ))}
       </div>
